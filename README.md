@@ -15,24 +15,20 @@ Capabilites are specific functions in a DevOps artifact. Some example capabiliti
 - Deploying to Google Cloud Run
 
 Modules contain the implementation. They are handled differently for each type of DevOps artifact. 
-
 - Azure Pipelines
   - Template YAML files.
-  - Pulled from git.
-
+  - Pulled from git
 - Terraform
   - Terraform modules
-  - Pulled from git.
-
+  - Pulled from git
 - Dockerfile
   - Base images
-  - Pulled from a Docker registry.
+  - Pulled from a Docker registry
 
 A CLI tool will be created to provide a simple interface for all users.
-It will validate user input and generate DevOps artifact ouptuts.
+It will validate user input and generate DevOps artifacts.
 The generated code should be very simple and mostly reference the modules.
-
-The input contains 
+The complexity should remain in the modules.
 
 **Responsabilities:**
 - Modules
@@ -43,8 +39,3 @@ The input contains
   - Input validation
   - Selecting and combining modules
   - User experience (UX)
-
-**Example Azure Pipeline:**
-
-Modules:
-- 
