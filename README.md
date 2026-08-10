@@ -9,6 +9,11 @@ Provide standardized DevOps artifacts and tools for scaffolding Science Platform
 All DevOps functionality is implemented in modules. The user specifies the capabilites and parameters as input.
 Then, the sepcified capabilities are combined into a DevOps artifact with the parameters.
 
+Capabilites are specific functions in a DevOps artifact. Some example capabilities with Azure Pipelines:
+- Python testing
+- Building and pushing an image
+- Deploying to Google Cloud Run
+
 Modules contain the implementation. They are handled differently for each type of DevOps artifact. 
 
 - Azure Pipelines
@@ -25,9 +30,11 @@ Modules contain the implementation. They are handled differently for each type o
 
 A CLI tool will be created to provide a simple interface for all users.
 It will validate user input and generate DevOps artifact ouptuts.
-The generated code should be very simple and mostly reference the modules. 
+The generated code should be very simple and mostly reference the modules.
 
-Responsabilities:
+The input contains 
+
+**Responsabilities:**
 - Modules
   - DevOps implementations
   - Using the parameters (e.g. GCP project ID)
@@ -36,3 +43,8 @@ Responsabilities:
   - Input validation
   - Selecting and combining modules
   - User experience (UX)
+
+**Example Azure Pipeline:**
+
+Modules:
+- 
