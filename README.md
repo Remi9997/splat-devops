@@ -6,9 +6,9 @@ Provide standardized DevOps artifacts and tools for scaffolding Science Platform
 
 ## Plan
 
-Use composition to provide DevOps functionality in modules. Use templates to put those modules together.
+All DevOps functionality is implemented in modules. The user specifies the capabilites and parameters as input.
+Then, the sepcified capabilities are combined into a DevOps artifact with the parameters.
 
-## Composition
 Modules contain the implementation. They are handled differently for each type of DevOps artifact. 
 
 - Azure Pipelines
@@ -23,9 +23,16 @@ Modules contain the implementation. They are handled differently for each type o
   - Base images
   - Pulled from a Docker registry.
 
-## Templates
+A CLI tool will be created to provide a simple interface for all users.
+It will validate user input and generate DevOps artifact ouptuts.
+The generated code should be very simple and mostly reference the modules. 
 
-Templates generate code from a set of parameters.
-They combine modules together to form a cohesive DevOps artifact (e.g. pipeline, infrastructure spec, Dockerfile).
+Responsabilities:
+- Modules
+  - DevOps implementations
+  - Using the parameters (e.g. GCP project ID)
 
-
+- CLI
+  - Input validation
+  - Selecting and combining modules
+  - User experience (UX)
