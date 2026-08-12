@@ -21,6 +21,7 @@ parameters:
 
 - name: outputName
   type: string
+  default: Image
 
 variables:
   imageUri: '${{ parameters.registryHost }}/${{ parameters.gcpProjectId }}/${{ parameters.artifactRepository }}/${{ parameters.imageName }}'
@@ -47,11 +48,11 @@ steps:
   workingDirectory: ${{ parameters.workingDirectory }}
 
 - script: |
-    IMAGE_REF=$(gcloud artifacts docker images describe \
+    IMAGE=$(gcloud artifacts docker images describe \
       "${{ variables.imageUri }}:$(Build.SourceVersion)" \
       --format='value(image_summary.fully_qualified_digest)')
 
-    echo "##vso[task.setvariable variable=imageRef;isOutput=true]${IMAGE_REF}"
+    echo "##vso[task.setvariable variable=image;isOutput=true]${IMAGE}"
   name: ${{ parameters.outputName }}
   displayName: Get Image Reference
   workingDirectory: ${{ parameters.workingDirectory }}

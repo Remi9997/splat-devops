@@ -1,0 +1,109 @@
+name: cicd-backend-$(Date:yyyyMMdd).$(Rev:r)
+
+resources:
+  repositories:
+    - repository: splat
+      type: git
+      name: Remi9997/splat-devops
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - my-app/**
+
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - my-app/**
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Test
+  displayName: Test Code
+
+  jobs:
+  - job: Test
+    steps:
+    - checkout: self
+
+    - template: modules/azure-pipelines/steps/python/tox.yaml@splat
+      parameters:
+        pythonVersion: '3.14'
+        workingDirectory: fastapi_app
+
+- stage: Build
+  displayName: Build Containers
+  dependsOn: Test
+  condition: |
+    and(
+      succeeded(),
+      eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    )
+
+  jobs:
+  - job: Build
+    steps:
+    - checkout: self
+
+    - template: modules/azure-pipelines/steps/gcp/setup-gcloud.yaml@splat
+      parameters:
+        azureServiceConnection: google-cloud
+        gcpWifProjectNumber: 618858441227
+        gcpWifPool: foundation-pool
+        gcpWifProvider: foundation-provider
+        gcpServiceAccount: 473836911083-compute@developer.gserviceaccount.com
+
+    - template: modules/azure-pipelines/steps/docker/chainguard-login.yaml@splat
+      parameters:
+        chainguardTokenSecret: my-chainguard-token
+        chainguardUsername: email@example.com
+
+    - template: modules/azure-pipleines/steps/docker/build-push.yaml@splat
+      parameters:
+        imageName: my-app
+        workingDirectory: my-app
+        registryHost: northamerica-northeast1-docker.pkg.dev
+        gcpProjectId: my-project
+        artifactRepository: my-registry
+        outputName: GetImage
+
+
+- stage: Deploy
+  displayName: Deploy to Cloud Run
+  dependsOn: Build
+  condition: succeeded()
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: production
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: modules/azure-pipelines/steps/gcp/setup-gcloud.yaml@splat
+            parameters:
+              azureServiceConnection: google-cloud
+              gcpWifProjectNumber: 618858441227
+              gcpWifPool: foundation-pool
+              gcpWifProvider: foundation-provider
+              gcpServiceAccount: 473836911083-compute@developer.gserviceaccount.com
+
+          - template: modules/azure-pipleines/steps/gcp/deploy-cloud-run.yaml@splat
+            parameters:
+              gcpProjectId: my-project
+              region: northamerica-northeast1
+              serviceName: my-app
+              image: $[ stageDependencies.Build.Build.outputs['GetImage.image'] ]
+
+
+

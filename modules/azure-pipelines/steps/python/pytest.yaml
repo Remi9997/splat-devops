@@ -28,4 +28,4 @@ steps:
   condition: succeededOrFailed()
   inputs:
     testResultsFormat: JUnit
-    testResultsFiles: ${{ parameters.workingDirectory }}/test-results.xml
+    testResultsFiles: '${{ parameters.workingDirectory }}/test-results.xml'
