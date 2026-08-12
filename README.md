@@ -7,7 +7,7 @@ Provide standardized DevOps artifacts and tools for scaffolding Science Platform
 ## Plan
 
 All DevOps functionality is implemented in modules. The user specifies the capabilites and parameters as input.
-Then, the sepcified capabilities are combined into a DevOps artifact with the parameters.
+Then, the sepcified capabilities are combined into a DevOps artifact alonside some parameters.
 
 Capabilites are specific functions in a DevOps artifact. Some example capabilities with Azure Pipelines:
 - Python testing
