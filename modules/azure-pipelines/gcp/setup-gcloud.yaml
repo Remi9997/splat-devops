@@ -1,0 +1,56 @@
+parameters:
+- name: azureServiceConnection
+  type: string
+
+- name: gcpWifProjectNumber
+  type: string
+
+- name: gcpWifPool
+  type: string
+
+- name: gcpWifProvider
+  type: string
+
+- name: gcpServiceAccount
+  type: string
+
+- name: gcpProjectId
+  type: string
+
+- name: gcloudVersion
+  type: string
+  default: '578.0.0'
+
+steps:
+- task: GoogleCloudSdkInstaller@0
+  inputs:
+    version: ${{ parameters.gcloudVersion }}
+
+- task: AzureCLI@2
+  displayName: Authenticate to Google Cloud (WIF)
+  inputs:
+    connectedServiceNameARM: ${{ parameters.azureServiceConnection }}
+    addSpnToEnvironment: true
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      echo "$idToken" > $(Pipeline.Workspace)/.workload_identity.jwt
+
+      cat > "$(Pipeline.Workspace)/.workload_identity.wlconfig" <<EOF
+      {
+        "type": "external_account",
+        "audience": "//iam.googleapis.com/projects/${{ parameters.gcpWifProjectNumber }}/locations/global/workloadIdentityPools/${{ parameters.gcpWifPool }}/providers/${{ parameters.gcpWifProvider }}",
+        "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+        "token_url": "https://sts.googleapis.com/v1/token",
+        "credential_source": {
+          "file": "$(Pipeline.Workspace)/.workload_identity.jwt"
+        },
+        "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${{ parameters.gcpServiceAccount }}:generateAccessToken"
+      }
+      EOF
+
+      echo "##vso[task.setvariable variable=GOOGLE_APPLICATION_CREDENTIALS]$(Pipeline.Workspace)/.workload_identity.wlconfig"
+
+- script: |
+    gcloud config set project ${{ parameters.gcpProjectId }}
+  displayName: Configure GCP Project

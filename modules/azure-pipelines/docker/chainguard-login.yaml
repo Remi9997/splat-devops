@@ -1,0 +1,18 @@
+parameters:
+- name: chainguardTokenSecret
+  type: string
+
+- name: chainguardUsername
+  type: string
+
+steps:
+- script: |
+    TOKEN=$(gcloud secrets versions access latest \
+      --secret="${{ parameters.chainguardTokenSecret }}")
+
+    echo "$TOKEN" | docker login \
+      artifacts-artefacts.devops.cloud-nuage.canada.ca:443 \
+      --username "${{ parameters.chainguardUsername }}" \
+      --password-stdin
+
+  displayName: Login to Chainguard

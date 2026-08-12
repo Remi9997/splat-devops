@@ -1,0 +1,21 @@
+parameters:
+- name: gcpProjectId
+  type: string
+
+- name: region
+  type: string
+
+- name: serviceName
+  type: string
+
+- name: image
+  type: string
+
+steps:
+- script: |
+    gcloud run deploy ${{ parameters.serviceName }} \
+      --project "${{ parameters.gcpProjectId }}" \
+      --region "${{ parameters.region }}" \
+      --image "${{ parameters.image }}" \
+      --quiet
+  displayName: Deploy to Cloud Run

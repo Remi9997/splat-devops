@@ -1,0 +1,31 @@
+parameters:
+- name: pythonVersion
+  type: string
+  default: '3.14'
+
+- name: workingDirectory
+  type: string
+
+steps:
+- task: UsePythonVersion@0
+  displayName: Use Python ${{ parameters.pythonVersion }}
+  inputs:
+    versionSpec: ${{ parameters.pythonVersion }}
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install tox
+  displayName: Install tox
+  workingDirectory: ${{ parameters.workingDirectory }}
+
+- script: |
+    tox
+  displayName: Run tox
+  workingDirectory: ${{ parameters.workingDirectory }}
+
+- task: PublishTestResults@2
+  displayName: Publish Test Results
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFormat: JUnit
+    testResultsFiles: '${{ parameters.workingDirectory }}/**/test-*.xml'

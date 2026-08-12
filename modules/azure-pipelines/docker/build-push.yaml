@@ -1,0 +1,57 @@
+parameters:
+- name: imageName
+  type: string
+
+- name: workingDirectory
+  type: string
+  default: "."  
+
+- name: dockerfilePath
+  type: string
+  default: "Dockerfile"
+
+- name: registryHost
+  type: string
+
+- name: gcpProjectId
+  type: string
+
+- name: artifactRepository
+  type: string
+
+- name: outputName
+  type: string
+
+variables:
+  imageUri: '${{ parameters.registryHost }}/${{ parameters.gcpProjectId }}/${{ parameters.artifactRepository }}/${{ parameters.imageName }}'
+
+steps:
+- script: |
+    gcloud auth configure-docker "${{ parameters.registryHost }}" --quiet
+  displayName: Configure Artifact Registry  
+  workingDirectory: ${{ parameters.workingDirectory }}
+
+- script: |
+    docker build \
+      -f "${{ parameters.dockerfilePath }}" \
+      -t "${{ variables.imageUri }}:$(Build.SourceVersion)" \
+      -t "${{ variables.imageUri }}:latest" \
+      .
+  displayName: Build Image
+  workingDirectory: ${{ parameters.workingDirectory }}
+
+- script: |
+    docker push "${{ variables.imageUri }}:$(Build.SourceVersion)"
+    docker push "${{ variables.imageUri }}:latest"
+  displayName: Push Image
+  workingDirectory: ${{ parameters.workingDirectory }}
+
+- script: |
+    IMAGE_REF=$(gcloud artifacts docker images describe \
+      "${{ variables.imageUri }}:$(Build.SourceVersion)" \
+      --format='value(image_summary.fully_qualified_digest)')
+
+    echo "##vso[task.setvariable variable=imageRef;isOutput=true]${IMAGE_REF}"
+  name: ${{ parameters.outputName }}
+  displayName: Get Image Reference
+  workingDirectory: ${{ parameters.workingDirectory }}
